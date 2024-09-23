@@ -1,8 +1,7 @@
 <script lang="ts">
-	let tasks = [
-		{ id: 1, name: 'Learn Svelte', done: false },
-		{ id: 2, name: 'Practice Tailwind Svelte', done: false }
-	];
+	import '../app.css';
+	import Task from '$lib/Task.svelte';
+	let tasks: any[] = [];
 	let newTask = '';
 	const addTask = () => {
 		if (newTask) {
@@ -11,27 +10,36 @@
 		}
 	};
 
-	const toggleTask = (index: number) => {
-		tasks[index].done = !tasks[index].done;
+	const toggleTask = (id: number) => {
+		tasks = tasks.map((task) => (task.id === id ? { ...task, done: !task.done } : task));
+	};
+
+	const onRemove = (id: number) => {
+		tasks = tasks.filter((task) => task.id !== id);
 	};
 </script>
 
 <aside>
 	<h1>Task Manager:</h1>
-	<input type="text" bind:value={newTask} />
-	<button on:click={addTask}>Add Task</button>
-	<ul class="p-6">
-		{#each tasks as task, i (task.id)}
-			<li class={task.done ? 'line-through text-gray-500' : ''}>
-				{task.name}
-				<button
-					on:click={() => {
-						toggleTask(i);
-					}}>{task.done ? '❌' : '✅'}</button
-				>
-			</li>
-		{/each}
-	</ul>
+	<div class="flex space-x-2 mb-6">
+		<input
+			type="text"
+			class="flex-grow border p-2 rounded"
+			bind:value={newTask}
+			placeholder="Add new task"
+		/>
+		<button on:click={addTask} class="bg-blue-500 text-white px-4 py-2 rounded">Add Task</button>
+	</div>
+
+	{#if tasks.length > 0}
+		<ul class="space-y-4">
+			{#each tasks as task (task.id)}
+				<Task {...task} {onRemove} {toggleTask} />
+			{/each}
+		</ul>
+	{:else}
+		<p class="text-center text-gray-500">No tasks available. Add a task to get started!</p>
+	{/if}
 </aside>
 
 <style>
