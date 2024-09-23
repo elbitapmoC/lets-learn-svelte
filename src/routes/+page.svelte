@@ -1,93 +1,54 @@
 <script lang="ts">
 	import '../app.css';
-	import { onMount } from 'svelte';
-	import { writable } from 'svelte/store';
+	import { tasksStore, taskStats, addTask } from '$lib/stores';
+	import Task from '$lib/Task.svelte';
 
-	// Task type definition
-	type Task = {
-		id: number;
-		name: string;
-		done: boolean;
-	};
+	let newTaskName = '';
 
-	// Svelte writable store for tasks
-	let tasks = writable<Task[]>([]);
-	let newTask = '';
-
-	// Fetch tasks from localStorage on component mount (only on client-side)
-	onMount(() => {
-		if (typeof localStorage !== 'undefined') {
-			const storedTasks = localStorage.getItem('tasks');
-			if (storedTasks) {
-				tasks.set(JSON.parse(storedTasks));
-			}
+	function handleAddTask(event: Event) {
+		event.preventDefault();
+		if (newTaskName.trim()) {
+			addTask(newTaskName.trim());
+			newTaskName = '';
 		}
-	});
-
-	// Subscribe to the tasks store and save to localStorage when tasks change
-	tasks.subscribe((value) => {
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('tasks', JSON.stringify(value));
-		}
-	});
-
-	// Add a new task
-	const addNewTask = () => {
-		if (newTask.trim()) {
-			tasks.update((currentTasks) => [
-				...currentTasks,
-				{ id: Date.now(), name: newTask, done: false }
-			]);
-			newTask = ''; // Clear the input field
-		}
-	};
-
-	// Toggle task completion
-	const toggleTask = (id: number) => {
-		tasks.update((currentTasks) =>
-			currentTasks.map((task) => (task.id === id ? { ...task, done: !task.done } : task))
-		);
-	};
-
-	// Remove a task
-	const removeTask = (id: number) => {
-		tasks.update((currentTasks) => currentTasks.filter((task) => task.id !== id));
-	};
+	}
 </script>
 
-<!-- Task Input Form -->
-<form on:submit|preventDefault={addNewTask} class="flex space-x-4 mb-6">
-	<input
-		type="text"
-		bind:value={newTask}
-		class="flex-grow border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-		placeholder="Enter a task"
-	/>
-	<button
-		type="submit"
-		class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200"
-	>
-		Add Task
-	</button>
-</form>
+<main class="dark:bg-gray-800">
+	<main class="max-w-2xl mx-auto p-6 bg-gray-100 dark:bg-gray-800 min-h-screen">
+		<h1 class="text-3xl font-bold mb-6 text-gray-800 dark:text-white">Task Manager</h1>
 
-<!-- Task List -->
-<ul class="space-y-4">
-	{#each $tasks as task (task.id)}
-		<li class="bg-gray-100 p-4 rounded flex justify-between items-center">
-			<label class="flex items-center space-x-2 cursor-pointer">
-				<input type="checkbox" checked={task.done} on:change={() => toggleTask(task.id)} />
-				<span class={task.done ? 'line-through text-gray-500' : ''}>
-					{task.name}
-				</span>
-			</label>
-			<button class="text-red-500" on:click={() => removeTask(task.id)} aria-label="Remove task">
-				Remove
-			</button>
-		</li>
-	{/each}
-</ul>
+		<form on:submit={handleAddTask} class="mb-8">
+			<div class="relative">
+				<input
+					bind:value={newTaskName}
+					type="text"
+					id="add-task"
+					class="block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+					placeholder="Add a new task"
+					required
+				/>
+				<button
+					type="submit"
+					class="text-white absolute right-2.5 bottom-2.5 bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-800 transition duration-150 ease-in-out"
+				>
+					Add Task
+				</button>
+			</div>
+		</form>
 
-<style>
-	/* You can add custom styles here, but Tailwind is used for most styling */
-</style>
+		<div class="space-y-3">
+			{#each $tasksStore as task (task.id)}
+				<Task {task} />
+			{/each}
+		</div>
+
+		<div class="mt-6 p-4 bg-white dark:bg-gray-700 rounded-lg shadow">
+			<h2 class="text-lg font-semibold mb-2 text-gray-800 dark:text-white">Task Statistics</h2>
+			<p class="text-sm text-gray-600 dark:text-gray-300">Total tasks: {$taskStats.total}</p>
+			<p class="text-sm text-gray-600 dark:text-gray-300">
+				Completed tasks: {$taskStats.completed}
+			</p>
+		</div>
+	</main>
+</main>
