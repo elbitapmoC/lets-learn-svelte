@@ -1,9 +1,9 @@
 <script>
-	export let id;
-	export let name;
 	export let done;
+	export let name;
+	export let id;
 	export let onRemove;
-	export let toggleTask;
+	export let toggleTask; // Declare toggleTask as a prop
 </script>
 
 <li class="bg-gray-50 p-4 rounded flex justify-between items-center">
@@ -17,7 +17,17 @@
 		/>
 		<span class={done ? 'line-through text-gray-500' : ''}>{name}</span>
 	</label>
-	<button class="text-red-500" on:click={() => onRemove(id)} aria-label="Remove task">
+	<button
+		class="text-red-500"
+		on:click|stopPropagation={() => onRemove(id)}
+		aria-label="Remove task"
+	>
 		Remove
 	</button>
 </li>
+
+<style>
+	li {
+		border: 1px solid #e2e8f0;
+	}
+</style>
