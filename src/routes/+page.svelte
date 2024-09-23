@@ -1,37 +1,41 @@
-<script>
-	// imports
-	import Heading from './components/Heading.svelte';
-	import Counter from './components/Counter.svelte';
-	import ToDo from './components/ToDo.svelte';
+<script lang="ts">
+	let tasks = [
+		{ id: 1, name: 'Learn Svelte', done: false },
+		{ id: 2, name: 'Practice Tailwind Svelte', done: false }
+	];
+	let newTask = '';
+	const addTask = () => {
+		if (newTask) {
+			tasks = [...tasks, { id: tasks.length + 1, name: newTask, done: false }];
+			newTask = '';
+		}
+	};
 
-	let name = '🍽️ Ahkal';
-	let substring = 'We hope you <strong>love</strong> your time here with us.';
-	let src = 'https://i.giphy.com/uVgqFuSbAQ15tV1NsK.webp';
-	let alt = 'NEVER GIVE UP!';
+	const toggleTask = (index: number) => {
+		tasks[index].done = !tasks[index].done;
+	};
 </script>
 
-<header>
-	<aside>
-		<Heading />
-		<!-- @html - does NOT sanitize. -->
-		<p>{@html substring}</p>
-		<Counter />
-	</aside>
-	<img {src} alt="{name} fights and fights, preaching {alt}" />
-</header>
-
-<ToDo />
+<aside>
+	<h1>Task Manager:</h1>
+	<input type="text" bind:value={newTask} />
+	<button on:click={addTask}>Add Task</button>
+	<ul class="p-6">
+		{#each tasks as task, i (task.id)}
+			<li class={task.done ? 'line-through text-gray-500' : ''}>
+				{task.name}
+				<button
+					on:click={() => {
+						toggleTask(i);
+					}}>{task.done ? '❌' : '✅'}</button
+				>
+			</li>
+		{/each}
+	</ul>
+</aside>
 
 <style>
-	header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		background-color: rgb(249, 237, 216);
-		padding: 1rem;
-		gap: 1rem;
-	}
-	p {
-		font-style: italic;
+	aside {
+		padding: 2rem;
 	}
 </style>
