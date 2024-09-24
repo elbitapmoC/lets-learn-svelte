@@ -5,10 +5,10 @@
 
 	let newTaskName = '';
 
-	function handleAddTask(event: Event) {
-		event.preventDefault();
-		if (newTaskName.trim()) {
-			addTask(newTaskName.trim());
+	function handleAddTask() {
+		newTaskName = newTaskName.trim();
+		if (newTaskName) {
+			addTask(newTaskName);
 			newTaskName = '';
 		}
 	}
@@ -18,7 +18,7 @@
 	<main class="max-w-2xl mx-auto p-6 bg-gray-100 dark:bg-gray-800 min-h-screen">
 		<h1 class="text-3xl font-bold mb-6 text-gray-800 dark:text-white">Task Manager</h1>
 
-		<form on:submit={handleAddTask} class="mb-8">
+		<form on:submit|preventDefault={handleAddTask} class="mb-8">
 			<div class="relative">
 				<input
 					bind:value={newTaskName}
